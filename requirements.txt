@@ -1,0 +1,9 @@
+Flask
+pandas
+zipfile36
+numpy==1.17.4
+folium
+plotly
+xarray
+cdsapi
+

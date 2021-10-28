@@ -1,0 +1,11 @@
+deploymentBucketName: cf-templates-156ajqe9kwja5-us-east-1
+VpcId: vpc-ac7776d4
+SubnetIds:
+  - subnet-f6aff092
+  - subnet-4faff02b
+  - subnet-39b5ea5d
+  - subnet-bc9ffb93
+ANSWER: 99
+food: taco
+CDSAPI_URL: https://cds.climate.copernicus.eu/api/v2
+CDSAPI_KEY: 8e106295-772d-4295-9054-2d9d7e3574ec

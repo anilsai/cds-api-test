@@ -1,0 +1,7 @@
+Resources:
+  cdsTestSecuritygroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub "${self:service}-sg"
+      GroupDescription: !Sub "Security group for ${self:service}"
+      VpcId: ${file(aws/serverless/params/sb.yml):VpcId}

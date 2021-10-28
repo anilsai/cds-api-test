@@ -1,0 +1,12 @@
+{
+  "name": "parp-media-thumbnail",
+  "description": "",
+  "version": "0.1.0",
+  "devDependencies": {
+    "serverless-deployment-bucket": "^1.5.1",
+    "serverless-wsgi": "^1.7.8"
+  },
+  "dependencies": {
+    "package.json": "^2.0.1"
+  }
+}

@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+<head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        function cb(selection) {
+            $.getJSON({
+                url: "/callback", data: { 'data': selection }, success: function (result) {
+                    Plotly.newPlot('chart', result, {});;
+                }
+            });
+        }
+    </script>
+</head>
+
+<body style="font-family:arial, sans-serif">
+<div>
+    <h1>Timeseries plot </h1><br>
+    <h5>
+        timestamp: {{month}} <br>
+        Latitude: {{lat}}<br>
+        Longitude: {{long}}<br>
+    </h5>
+
+    <div id="chart" class="chart"></div>
+    </div>
+    <div class="container">
+
+
+    <form class="ae_btn" name="score_btn" action="/get/download_data" method="post"> <p class="ae_btn"> &nbsp; &nbsp;</p>
+ <button name="ae_btn" class="btn1"><i class="fa fa-download"></i> Download Data</button></b>
+ </form>
+    </div>
+</body>
+
+<script>
+    d = {{ graphJSON | safe }};
+    Plotly.newPlot('chart', d, {});
+</script>
+
+
+</html>

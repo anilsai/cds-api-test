@@ -1,0 +1,73 @@
+# Welcome to Serverless!
+# For full config options, check the docs:
+#    docs.serverless.com
+# Happy Coding!
+#
+# Useful links:
+# https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml/
+# https://www.serverless.com/framework/docs/providers/aws/guide/variables/
+# https://www.serverless.com/framework/docs/providers/aws/events/apigateway/
+
+service: ord-test-cds
+
+plugins:
+  - serverless-wsgi
+  - serverless-deployment-bucket
+
+provider:
+  name: aws
+  runtime: python3.7
+  versionFunctions: false
+  stage: sb
+  stackName: ${self:service}-sb
+  memorySize: 512
+  timeout: 30
+  logRetentionInDays: 180
+  region: us-east-1
+  role: arn:aws:iam::947682355454:role/ord-project
+  logs:
+    restApi: # Optional configuration which specifies if API Gateway logs are used. This can either be set to `true` to use defaults, or configured via subproperties.
+      accessLogging: true # Optional configuration which enables or disables access logging. Defaults to true.
+      format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "caller":"$context.identity.caller", "user":"$context.identity.user","requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod","resourcePath":"$context.resourcePath", "status":"$context.status","protocol":"$context.protocol", "responseLength":"$context.responseLength", "responseLatency": "$context.responseLatency", "intergrationLatency": "$context.integrationLatency", "requestPath": "$context.path" }' # Optional configuration which specifies the log format to use for access logging.
+      executionLogging: true # Optional configuration which enables or disables execution logging. Defaults to true.
+      level: INFO # Optional configuration which specifies the log level to use for execution logging. May be set to either INFO or ERROR.
+      fullExecutionData: true # Optional configuration which specifies whether or not to log full requests/responses for execution logging. Defaults to true.
+      role: arn:aws:iam::947682355454:role/ord-project # Existing IAM role for ApiGateway to use when managing CloudWatch Logs. If 'role' is not configured, a new role is automatically created.
+      roleManagedExternally: true
+  deploymentBucket:
+    name: ${file(aws/serverless/params/sb.yml):deploymentBucketName}
+    serverSideEncryption: AES256
+  environment:
+    ANSWER: ${file(aws/serverless/params/sb.yml):ANSWER}
+    food: ${file(aws/serverless/params/sb.yml):food}
+    CDSAPI_URL: ${file(aws/serverless/params/sb.yml):CDSAPI_URL}
+    CDSAPI_KEY: ${file(aws/serverless/params/sb.yml):CDSAPI_KEY}
+
+  vpc:
+    securityGroupIds:
+      - Ref: cdsTestSecuritygroup
+    subnetIds: ${file(aws/serverless/params/sb.yml):SubnetIds}
+  stackTags:
+    Project: "test-cds"
+    ResourceOwner: "anil.bodepudi@corteva.com"
+    DeployedBy: "anil.bodepudi@corteva.com"
+    orgname: "dsi"
+    projcode: "test-anil"
+    environment: sb
+  tags:
+    Project: "test-cds"  #Acts as a condition key in media api deploy role's permissions
+    ResourceOwner: "anil.bodepudi@corteva.com"
+    DeployedBy: "anil.bodepudi@corteva.com"
+    projcode: "test-anil"
+    environment: sb
+
+
+functions:
+  cds-test:
+    reservedConcurrency: 1
+    image: 947682355454.dkr.ecr.us-east-1.amazonaws.com/cds-api-server:latest
+    events:
+        - http: ANY /
+        - http: 'ANY {proxy+}'
+resources:
+  - ${file(aws/serverless/resources/sg.yaml)}

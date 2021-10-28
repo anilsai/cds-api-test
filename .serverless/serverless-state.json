@@ -1,0 +1,429 @@
+{
+  "service": {
+    "service": "ord-test-cds",
+    "serviceObject": {
+      "name": "ord-test-cds"
+    },
+    "provider": {
+      "name": "aws",
+      "runtime": "python3.7",
+      "versionFunctions": false,
+      "stage": "sb",
+      "stackName": "ord-test-cds-sb",
+      "memorySize": 512,
+      "timeout": 30,
+      "logRetentionInDays": 180,
+      "region": "us-east-1",
+      "role": "arn:aws:iam::947682355454:role/ord-project",
+      "logs": {
+        "restApi": {
+          "accessLogging": true,
+          "format": "{ \"requestId\":\"$context.requestId\", \"ip\": \"$context.identity.sourceIp\", \"caller\":\"$context.identity.caller\", \"user\":\"$context.identity.user\",\"requestTime\":\"$context.requestTime\", \"httpMethod\":\"$context.httpMethod\",\"resourcePath\":\"$context.resourcePath\", \"status\":\"$context.status\",\"protocol\":\"$context.protocol\", \"responseLength\":\"$context.responseLength\", \"responseLatency\": \"$context.responseLatency\", \"intergrationLatency\": \"$context.integrationLatency\", \"requestPath\": \"$context.path\" }",
+          "executionLogging": true,
+          "level": "INFO",
+          "fullExecutionData": true,
+          "role": "arn:aws:iam::947682355454:role/ord-project",
+          "roleManagedExternally": true
+        }
+      },
+      "deploymentBucket": "cf-templates-156ajqe9kwja5-us-east-1",
+      "environment": {
+        "ANSWER": "99",
+        "food": "taco",
+        "CDSAPI_URL": "https://cds.climate.copernicus.eu/api/v2",
+        "CDSAPI_KEY": "8e106295-772d-4295-9054-2d9d7e3574ec"
+      },
+      "vpc": {
+        "securityGroupIds": [
+          {
+            "Ref": "cdsTestSecuritygroup"
+          }
+        ],
+        "subnetIds": [
+          "subnet-f6aff092",
+          "subnet-4faff02b",
+          "subnet-39b5ea5d",
+          "subnet-bc9ffb93"
+        ]
+      },
+      "stackTags": {
+        "Project": "test-cds",
+        "ResourceOwner": "anil.bodepudi@corteva.com",
+        "DeployedBy": "anil.bodepudi@corteva.com",
+        "orgname": "dsi",
+        "projcode": "test-anil",
+        "environment": "sb"
+      },
+      "tags": {
+        "Project": "test-cds",
+        "ResourceOwner": "anil.bodepudi@corteva.com",
+        "DeployedBy": "anil.bodepudi@corteva.com",
+        "projcode": "test-anil",
+        "environment": "sb"
+      },
+      "deploymentBucketObject": {
+        "name": "cf-templates-156ajqe9kwja5-us-east-1",
+        "serverSideEncryption": "AES256"
+      },
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "CdsDashtestLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/ord-test-cds-sb-cds-test",
+              "RetentionInDays": 180
+            }
+          },
+          "CdsDashtestLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "ImageUri": "947682355454.dkr.ecr.us-east-1.amazonaws.com/ord-analysis-server@sha256:241285fe3bd25cb7acf9d46354ef8114d6a54ba05861492a3d98301de497d517"
+              },
+              "PackageType": "Image",
+              "FunctionName": "ord-test-cds-sb-cds-test",
+              "MemorySize": 512,
+              "Timeout": 30,
+              "Tags": [
+                {
+                  "Key": "Project",
+                  "Value": "test-cds"
+                },
+                {
+                  "Key": "ResourceOwner",
+                  "Value": "anil.bodepudi@corteva.com"
+                },
+                {
+                  "Key": "DeployedBy",
+                  "Value": "anil.bodepudi@corteva.com"
+                },
+                {
+                  "Key": "projcode",
+                  "Value": "test-anil"
+                },
+                {
+                  "Key": "environment",
+                  "Value": "sb"
+                }
+              ],
+              "Environment": {
+                "Variables": {
+                  "ANSWER": "99",
+                  "food": "taco",
+                  "CDSAPI_URL": "https://cds.climate.copernicus.eu/api/v2",
+                  "CDSAPI_KEY": "8e106295-772d-4295-9054-2d9d7e3574ec"
+                }
+              },
+              "Role": "arn:aws:iam::947682355454:role/ord-project",
+              "VpcConfig": {
+                "SecurityGroupIds": {
+                  "$ref": "$[\"service\"][\"provider\"][\"vpc\"][\"securityGroupIds\"]"
+                },
+                "SubnetIds": {
+                  "$ref": "$[\"service\"][\"provider\"][\"vpc\"][\"subnetIds\"]"
+                }
+              },
+              "ReservedConcurrentExecutions": 1
+            },
+            "DependsOn": [
+              "CdsDashtestLogGroup"
+            ]
+          },
+          "ApiGatewayRestApi": {
+            "Type": "AWS::ApiGateway::RestApi",
+            "Properties": {
+              "Name": "sb-ord-test-cds",
+              "EndpointConfiguration": {
+                "Types": [
+                  "EDGE"
+                ]
+              },
+              "Policy": ""
+            }
+          },
+          "ApiGatewayResourceProxyVar": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "{proxy+}",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodAny": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "ANY",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "CdsDashtestLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "CdsDashtestLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayMethodProxyVarAny": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "ANY",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceProxyVar"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "CdsDashtestLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "CdsDashtestLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayDeployment1635349024742": {
+            "Type": "AWS::ApiGateway::Deployment",
+            "Properties": {
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "StageName": "sb"
+            },
+            "DependsOn": [
+              "ApiGatewayMethodAny",
+              "ApiGatewayMethodProxyVarAny"
+            ]
+          },
+          "CdsDashtestLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "CdsDashtestLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "ApiGatewayLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/api-gateway/ord-test-cds-sb",
+              "RetentionInDays": 180
+            }
+          },
+          "cdsTestSecuritygroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+              "GroupName": {
+                "Fn::Sub": "ord-test-cds-sg"
+              },
+              "GroupDescription": {
+                "Fn::Sub": "Security group for ord-test-cds"
+              },
+              "VpcId": "vpc-ac7776d4"
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": "cf-templates-156ajqe9kwja5-us-east-1",
+            "Export": {
+              "Name": "sls-ord-test-cds-sb-ServerlessDeploymentBucketName"
+            }
+          },
+          "ServiceEndpoint": {
+            "Description": "URL of the service endpoint",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://",
+                  {
+                    "Ref": "ApiGatewayRestApi"
+                  },
+                  ".execute-api.",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ".",
+                  {
+                    "Ref": "AWS::URLSuffix"
+                  },
+                  "/sb"
+                ]
+              ]
+            },
+            "Export": {
+              "Name": "sls-ord-test-cds-sb-ServiceEndpoint"
+            }
+          }
+        }
+      }
+    },
+    "plugins": [
+      "serverless-wsgi",
+      "serverless-deployment-bucket"
+    ],
+    "pluginsData": {},
+    "functions": {
+      "cds-test": {
+        "reservedConcurrency": 1,
+        "image": "947682355454.dkr.ecr.us-east-1.amazonaws.com/ord-analysis-server:latest",
+        "events": [
+          {
+            "http": "ANY /"
+          },
+          {
+            "http": "ANY {proxy+}"
+          }
+        ],
+        "name": "ord-test-cds-sb-cds-test",
+        "package": {},
+        "memory": 512,
+        "timeout": 30,
+        "vpc": {}
+      }
+    },
+    "resources": {
+      "Resources": {
+        "cdsTestSecuritygroup": {
+          "Type": "AWS::EC2::SecurityGroup",
+          "Properties": {
+            "GroupName": {
+              "Fn::Sub": "ord-test-cds-sg"
+            },
+            "GroupDescription": {
+              "Fn::Sub": "Security group for ord-test-cds"
+            },
+            "VpcId": "vpc-ac7776d4"
+          }
+        }
+      },
+      "Outputs": {}
+    },
+    "configValidationMode": "warn",
+    "serviceFilename": "serverless.yml",
+    "initialServerlessConfig": {
+      "service": {
+        "$ref": "$[\"service\"][\"serviceObject\"]"
+      },
+      "plugins": {
+        "$ref": "$[\"service\"][\"plugins\"]"
+      },
+      "provider": {
+        "$ref": "$[\"service\"][\"provider\"]"
+      },
+      "functions": {
+        "$ref": "$[\"service\"][\"functions\"]"
+      },
+      "resources": {
+        "$ref": "$[\"service\"][\"resources\"]"
+      }
+    },
+    "layers": {},
+    "isDashboardMonitoringPreconfigured": false
+  },
+  "package": {
+    "artifactDirectoryName": "serverless/ord-test-cds/sb/1635349076577-2021-10-27T15:37:56.577Z",
+    "artifact": ""
+  }
+}
